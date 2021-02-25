@@ -1,7 +1,7 @@
 # Power Platform PowerShell Helpers
-Some lightweight PowerShell helper scripts for Power Platform / Common Data Service (CDS) / Dynamics 365 (D365).
+Some lightweight PowerShell helper scripts for Power Platform / Dataverse (formally CDS) / Dynamics 365 (D365).
 
-These helpers allows you to script different CDS operations and deployment activities that cannot be performed with a solution import, particularly with unmanaged solutions. For example deleting components such as fields, views, etc.
+These helpers allows you to script different Dataverse operations and deployment activities that cannot be performed with a solution import, particularly with unmanaged solutions. For example deleting components such as fields, views, etc.
 
 Available functions:
 - Delete processes (classic workflows and business rules)
