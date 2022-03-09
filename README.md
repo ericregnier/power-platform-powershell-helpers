@@ -11,9 +11,12 @@ Available functions:
 - Delete views
 - Delete option sets
 - Delete option set items
+- Delete plugin 
 - Delete plugin steps
 - Delete web resources
 - Delete solutions
 - Update Service Endpoints (Queues and Webhooks)
+- Delete Canvas Apps
+- Remove/Edit Environment Variables
 
-For samples, see [RunCdsCommands.ps1](https://github.com/ericregnier/PowerPlatformPowerShellHelpers/blob/main/RunCdsCommands.ps1)
+For samples, see [RunDataverseCommands.ps1](https://github.com/ericregnier/PowerPlatformPowerShellHelpers/blob/main/RunDataverseCommands.ps1)
