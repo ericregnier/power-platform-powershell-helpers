@@ -1,4 +1,4 @@
-Import-Module "$PSScriptRoot\CdsCommonModule.psm1"
+Import-Module "$PSScriptRoot\DataverseCommonModule.psm1"
 
 Register-Module -Name Microsoft.Xrm.Data.PowerShell
 
@@ -237,6 +237,21 @@ function Remove-Plugin(
     Write-Host "Plugin $RecordId deleted" -ForegroundColor Green
 }
 
+function Remove-PluginStep(
+    [CmdletBinding()]
+    [string] $Id,    
+    [Microsoft.Xrm.Tooling.Connector.CrmServiceClient] $Connection
+) {
+    Write-Host "Deleting plugin step" $Id -ForegroundColor Green
+    try {
+        Remove-CrmRecord -conn $Connection -CrmRecord @{ "sdkmessageprocessingstepid" = $Id; "LogicalName" = "sdkmessageprocessingstep" }
+        Write-Host "Plugin step" $Id "deleted" -ForegroundColor Green
+    }
+    Catch { 
+        Write-Host "Plugin step" $Id "does not exist" -ForegroundColor Cyan
+    }  
+}
+
 function Remove-Entity(
     [CmdletBinding()]
     [string] $EntityName,
@@ -380,4 +395,82 @@ function Remove-OptionSetItem(
         Write-Host "Option set item $Value does not exist" -ForegroundColor Cyan
     }
     Write-Host "Option set item $Value deleted" -ForegroundColor Green
+}
+
+function Update-EnvVariable
+(
+    [CmdletBinding()]
+    [Guid] $EnvVariableId,
+    [Microsoft.Xrm.Tooling.Connector.CrmServiceClient] $Connection
+) {
+
+    $updateFields = @{ }
+    $updateFields.Add("value", $Value)  
+
+    Set-CrmRecord -conn $Connection -Fields $updateFields -Id $EnvVariableId -EntityLogicalName "environmentvariablevalue"
+}
+
+function Remove-EnvVariable(
+    [CmdletBinding()]
+    [string] $Name,    
+    [Microsoft.Xrm.Tooling.Connector.CrmServiceClient] $Connection
+) {
+    Write-Host "Deleting environment variable" $Name -ForegroundColor Green
+
+    $fetchXml =
+    @"
+<fetch>
+  <entity name="environmentvariabledefinition">  
+    <filter type="and" >
+        <condition attribute="schemaname" operator="eq" value="$Name" />      
+    </filter>
+  </entity>
+</fetch>
+"@
+
+    $response = Get-CrmRecordsByFetch -Fetch $fetchXml -conn $Connection
+
+    if ($response.CrmRecords.Count -gt 0) {
+
+        $ref = new-object Microsoft.Xrm.Sdk.EntityReference
+        $ref.LogicalName = "environmentvariabledefinition"
+        $ref.Id = $response.CrmRecords[0].environmentvariabledefinitionid
+
+        $deleteRequest = new-object Microsoft.Xrm.Sdk.Messages.DeleteRequest
+        $deleteRequest.Target = $ref
+                 
+        $Connection..ExecuteCrmOrganizationRequest($deleteRequest)
+
+        Write-Host "Environment variable" $Name "deleted" -ForegroundColor Green
+    }
+    else {
+        Write-Host "Environment variable" $Name "does not exist" -ForegroundColor Cyan
+    }
+}
+
+function Remove-CanvasApp(
+    [CmdletBinding()]
+    [string] $EnvironmentName,
+    [string] $CanvasAppName
+) {
+    Try {
+        $env = Get-AdminPowerAppEnvironment *$EnvironmentName* 
+        if($env.Count -gt 1) {
+            Write-Host "More than one env found for" $EnvironmentName -ForegroundColor Cyan
+            return
+        }
+     
+        $app = Get-AdminPowerApp "'$CanvasAppName'" -EnvironmentName $env.EnvironmentName | Select-Object -First 1
+
+        if($env.Count -gt 1) {
+            Write-Host "More than one app found for" $CanvasAppName -ForegroundColor Cyan
+            return
+        }
+
+        Remove-AdminPowerApp -AppName $app.AppName -EnvironmentName $env.EnvironmentName
+        Write-Host "App" $CanvasAppName "deleted sucessfully in" $EnvironmentName
+    }
+    Catch { 
+        Write-Host "Failed to delete app " $CanvasAppName "in" $EnvironmentName -ForegroundColor Cyan
+    }
 }
