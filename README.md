@@ -7,7 +7,7 @@ Available functions:
 - Delete processes (classic workflows and business rules)
 - Delete entities
 - Delete fields
-- Delete forms (views, web resources, forms, dashboard, workflow, plugin step, field security profile)
+- Delete forms
 - Delete views
 - Delete option sets
 - Delete option set items
