@@ -1,4 +1,4 @@
-# CDS requires [System.Net.SecurityProtocolType]::Tls12
+# Dataverse requires [System.Net.SecurityProtocolType]::Tls12
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls -bor [System.Net.SecurityProtocolType]::Tls12
 
 #Set-ExecutionPolicy –ExecutionPolicy RemoteSigned –Scope CurrentUser
@@ -18,7 +18,6 @@ function Register-Module {
     Param(
         [string] [Parameter(Mandatory = $true)] $Name
     )
-    Write-Host "ERIC" $Name
     if (-not (Get-Module -Name $Name -ListAvailable)) {
         Write-Host "Module $Name not installed so installing" -ForegroundColor Green
         Install-Module -Name $Name -Scope AllUsers
@@ -31,13 +30,13 @@ function Register-Module {
 
 <#
 .Synopsis
-	Initiates a new CDS connection.
+	Initiates a new Dataverse connection.
 
 .Description
     Uses the Powershell module https://github.com/seanmcne/Microsoft.Xrm.Data.PowerShell
 
 .Parameter UserName
-	Account to connect to CDS/D365 with
+	Account to connect to Dataverse/D365 with
 
 .Parameter Password
 	Password for the account
@@ -46,12 +45,12 @@ function Register-Module {
 	Region to connect to
 
 .Parameter Organisation
-    Name of the CDS instance to connect to
+    Name of the Dataverse instance to connect to
     
 .Example 
-    $Connection = Get-CdsConnection -UserName $UserName -Password $Password -Region $Region -Organisation $Organisation -MaxAttempts 3
+    $Connection = Get-DataverseConnection -UserName $UserName -Password $Password -Region $Region -Organisation $Organisation -MaxAttempts 3
 #>
-function Get-CdsConnection {    
+function Get-DataverseConnection {    
     [CmdletBinding()]
     Param(
         [parameter(Mandatory = $true)][string]$UserName,
@@ -72,7 +71,7 @@ function Get-CdsConnection {
         $failed = $false
 		
         try {
-            $conn = Get-CrmConnection -OnLineType Office365 -OrganizationName $Organisation -DeploymentRegion $Region -Credential $creds
+            $conn = Get-CrmConnection -OnlineType Office365 -OrganizationName $Organisation -DeploymentRegion $Region -Credential $creds
         }
         catch {
             $failed = $true
