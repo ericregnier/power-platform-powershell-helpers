@@ -2,14 +2,17 @@ Param(
     [string] [Parameter(Mandatory = $true)] $UserName,
     [string] [Parameter(Mandatory = $true)] $Password,
     [string] [Parameter(Mandatory = $true)] $Region,
-    [string] [Parameter(Mandatory = $true)] $Organisation
+    [string] [Parameter(Mandatory = $true)] $Organisation,
+    [string] [Parameter(Mandatory = $true)] $TenantId
 )
 
-Import-Module "$PSScriptRoot\CdsOperations.psm1"
+Import-Module "$PSScriptRoot\DataverseOperations.psm1"
 
-$Connection = Get-CdsConnection -UserName $UserName -Password $Password -Region $Region -Organisation $Organisation -MaxAttempts 3
+$Connection = Get-DataverseConnection -UserName $UserName -Password $Password -Region $Region -Organisation $Organisation -MaxAttempts 3
 
-#Int he below exmaple, the $Env:SERVICEBUSURL and $Env:AZUREQUEUENAME are from Azure DevOps variable
+Add-PowerAppsAccount -TenantID $TenantId -Username $Username -Password $Password
+
+#In the below example, the $Env:SERVICEBUSURL and $Env:AZUREQUEUENAME are from Azure DevOps variable
 Update-QueueServiceEndpoint -Connection $Connection -ServiceEndpointId "00000000-0000-0000-0000-000000000000" -SasKey "ServiceBusSasKey" -Address $Env:SERVICEBUSURL -Path $Env:AZUREQUEUENAME
 
 Update-WebhookServiceEndpoint -Connection $Connection -ServiceEndpointId "00000000-0000-0000-0000-000000000000" -SasKey "WebhookKey" -Address "https://address.com"
@@ -33,6 +36,8 @@ Remove-OptionSetItem -OptionSetName "cr06a_optionsetname" -Value 100000000 -Conn
 
 Remove-Plugin -RecordId "00000000-0000-0000-0000-000000000000" -Connection $Connection
 
+Remove-PluginStep -Id "00000000-0000-0000-0000-000000000000" -Connection $Connection
+
 Remove-WebResource -WebResourceId "00000000-0000-0000-0000-000000000000" -Connection $Connection
 
 $condition =
@@ -45,3 +50,9 @@ $condition =
     </filter>
 "@
 Remove-Solutions -FetchXmlFilterCondition $condition -Connection $Connection
+
+Update-EnvVariable -EnvVariableId "00000000-0000-0000-0000-000000000000" -Connection $Connection
+
+Remove-EnvVariable -Name "cr06a_envvar" -Connection $Connection
+
+Remove-CanvasApp -EnvironmentName "prod" -CanvasAppName "cr06a_app"
